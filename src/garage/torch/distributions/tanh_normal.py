@@ -1,8 +1,9 @@
 """A Gaussian distribution with tanh transformation."""
 import torch
-from torch.distributions import Normal
+from torch.distributions import Normal, constraints
 from torch.distributions.independent import Independent
-
+from torch.distributions.utils import broadcast_all
+from numbers import Number
 
 class TanhNormal(torch.distributions.Distribution):
     r"""A distribution induced by applying a tanh transformation to a Gaussian random variable.
@@ -17,10 +18,16 @@ class TanhNormal(torch.distributions.Distribution):
         scale (torch.Tensor): The stdev of this distribution.
 
     """ # noqa: 501
+    arg_constraints = {'loc': constraints.real, 'scale': constraints.positive}
+    def __init__(self, loc, scale, validate_args=None):
+        self.loc, self.scale = broadcast_all(loc, scale)
+        if isinstance(loc, Number) and isinstance(scale, Number):
+            batch_shape = torch.Size()
+        else:
+            batch_shape = self.loc.size()
 
-    def __init__(self, loc, scale):
         self._normal = Independent(Normal(loc, scale), 1)
-        super().__init__()
+        super().__init__(batch_shape=batch_shape, validate_args = validate_args)
 
     def log_prob(self, value, pre_tanh_value=None, epsilon=1e-6):
         """The log likelihood of a sample on the this Tanh Distribution.
