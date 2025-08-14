@@ -126,7 +126,7 @@ class Snapshotter:
             with open(file_name, 'wb') as file:
                 cloudpickle.dump(params, file)
         if file_name_best:
-            with oepn(file_name_best,'wb') as file:
+            with open(file_name_best,'wb') as file:
                 cloudpickle.dump(params, file)
 
     def load(self, load_dir, itr='last'):
