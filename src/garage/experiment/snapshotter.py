@@ -82,7 +82,7 @@ class Snapshotter:
         """
         return self._snapshot_gap
 
-    def save_itr_params(self, itr, params):
+    def save_itr_params(self, itr, params, best=False):
         """Save the parameters if at the right iteration.
 
         Args:
@@ -95,7 +95,7 @@ class Snapshotter:
 
         """
         file_name = None
-
+        file_name_best = None
         if self._snapshot_mode == 'all':
             file_name = os.path.join(self._snapshot_dir, 'itr_%d.pkl' % itr)
         elif self._snapshot_mode == 'gap_overwrite':
@@ -120,9 +120,13 @@ class Snapshotter:
         else:
             raise ValueError('Invalid snapshot mode {}'.format(
                 self._snapshot_mode))
-
+        if best:
+            file_name_best = os.path.join(self._snapshot_dir, 'best.pkl')
         if file_name:
             with open(file_name, 'wb') as file:
+                cloudpickle.dump(params, file)
+        if file_name_best:
+            with oepn(file_name_best,'wb') as file:
                 cloudpickle.dump(params, file)
 
     def load(self, load_dir, itr='last'):
